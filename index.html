@@ -145,6 +145,70 @@
       })();
   </script>
 
+  <script>
+      (function () {
+        function setVal(id, val) {
+            if (val == null) return;
+            var el = document.getElementById(id);
+            if (el) el.value = val;
+        }
+        function setSelect(id, val) {
+            if (!val) return;
+            var el = document.getElementById(id);
+            if (!el) return;
+            var opt = Array.from(el.options).find(o => o.value === val);
+            if (opt) el.value = val;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var qs = new URLSearchParams(location.search);
+            var get = (k) => (qs.get(k) || '').trim();
+
+            // 1) 基础信息
+            setVal('date', get('date'));                // YYYY-MM-DD
+            setVal('refNo', get('refNo'));
+
+            // 2) 交易信息
+            setSelect('transactionType', get('tx'));
+            setVal('rate', get('rate'));
+            setVal('payAmount', get('receiving'));
+
+            // 3) 银行信息
+            setVal('bankName', get('bankName') || get('bank')); // 兼容 bank
+            setVal('accountName', get('accountName'));
+            setVal('bsb', get('bsb'));
+            setVal('accountNumber', get('accountNumber') || get('acct'));
+
+            // 4) 收款人信息
+            setVal('receiverName', get('receiverName'));
+            setVal('receiverPhone', get('receiverPhone'));
+            setVal('receiverAddress', get('receiverAddress'));
+
+            // 5) 汇款用途
+            var reason = get('reason');
+            setSelect('transferReason', reason);
+            // 触发外部“显示 Other 文本框”的逻辑
+            var reasonSel = document.getElementById('transferReason');
+            if (reasonSel) {
+              reasonSel.dispatchEvent(new Event('change'));
+            }
+            // 若为 OTHER，填入 reasonOther
+            var other = get('reasonOther');
+            if (other) setVal('transferReasonOther', other);
+
+            // 更新 UI & 计算
+            if (typeof updateUI === 'function') updateUI();
+            if (typeof calculate === 'function') calculate();
+
+            // 是否自动生成 PDF
+            if (get('autogen') === '1') {
+              var btn = document.getElementById('generatePdf');
+              if (btn) setTimeout(() => btn.click(), 200); // 稍等 200ms，确保计算完毕
+            }
+        });
+      })();
+  </script>
+
     <button type="button" id="generatePdf">生成PDF发票</button>
 </form>
 
