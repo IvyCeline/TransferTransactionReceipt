@@ -1,0 +1,365 @@
+<!-- File: index.html (no fees rendered) -->
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>海侨汇通 - 双联货币兑换发票</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <style>
+    body { font-family: 'Microsoft YaHei', Arial, sans-serif; background-color: #f9f9fb; padding: 40px; color: #333; max-width: 900px; margin: auto; }
+    h1 { text-align: center; color: #1a5dbb; margin-bottom: 10px; }
+    p.subtitle { text-align: center; color: #666; font-size: 16px; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; }
+    input, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    button { background-color: #1a5dbb; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; display: block; margin: 30px auto; }
+    .calculation { text-align: center; font-size: 16px; margin: 20px 0; padding: 10px; background-color: #eef4ff; border-radius: 4px; }
+    .required { color: red; }
+  </style>
+</head>
+<body>
+
+<h1>海侨汇通 - 货币兑换发票</h1>
+<p class="subtitle">支持 AUD/USD ↔ CNY 兑换，双联自动填充</p>
+
+<form id="webForm">
+  <div class="grid-2">
+    <div class="form-group">
+      <label>Date (日期) <span class="required">*</span></label>
+      <input type="date" id="date" required />
+    </div>
+    <div class="form-group">
+      <label>Ref# (参考号) <span class="required">*</span></label>
+      <input type="text" id="refNo" required autocomplete="off" />
+    </div>
+  </div>
+
+  <hr />
+
+  <h3>交易方向</h3>
+  <div class="form-group">
+    <select id="transactionType" required>
+      <option value="">请选择交易类型</option>
+      <option value="AUD_to_CNY">AUD → CNY（客户付AUD收CNY）</option>
+      <option value="CNY_to_AUD">CNY → AUD（客户付CNY收AUD）</option>
+      <option value="USD_to_CNY">USD → CNY（客户付USD收CNY）</option>
+      <option value="CNY_to_USD">CNY → USD（客户付CNY收USD）</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label>汇率 Rate (1 外币 = ? CNY) *</label>
+    <input type="number" id="rate" step="0.0001" required autocomplete="off" />
+  </div>
+
+  <div class="form-group">
+    <label id="amountInputLabel">客户支付金额 *</label>
+    <input type="number" id="payAmount" step="0.01" placeholder="输入金额" required />
+  </div>
+
+  <div class="calculation">
+    <strong>计算结果：</strong><br>
+    <span id="formula">请选择交易类型</span>
+  </div>
+
+  <hr />
+
+  <h3>收款人银行账户（客户收款账户）</h3>
+  <div class="grid-2">
+    <div class="form-group">
+      <label>Bank (银行名称)</label>
+      <input type="text" id="bankName" placeholder="银行名称" />
+    </div>
+    <div class="form-group">
+      <label>Account Name (账户名)</label>
+      <input type="text" id="accountName" placeholder="中文姓名拼音大写" />
+    </div>
+    <div class="form-group">
+      <label>BSB / SWIFT</label>
+      <input type="text" id="bsb" placeholder="根据币种填写" />
+    </div>
+    <div class="form-group">
+      <label>Account No. (账号)</label>
+      <input type="text" id="accountNumber" placeholder="银行卡号" />
+    </div>
+  </div>
+
+  <hr />
+
+  <h3>收款人个人信息</h3>
+  <div class="grid-2">
+    <div class="form-group">
+      <label>Receiver Full Name <span class="required">*</span></label>
+      <input type="text" id="receiverName"  required autocomplete="off" />
+    </div>
+    <div class="form-group">
+      <label>Phone</label>
+      <input type="tel" id="receiverPhone" autocomplete="off" inputmode="tel" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>Address <span class="required">*</span></label>
+    <input type="text" id="receiverAddress" required autocomplete="off" />
+  </div>
+  <div class="form-group">
+    <label for="transferReason">Transfer Reason (汇款用途) <span class="required">*</span></label>
+      <select id="transferReason" required>
+        <option value="" selected>-- Please Select 请选择 --</option>
+        <option value="COST OF LIVING">Cost of Living（生活费）</option>
+        <option value="PROCUREMENT PAYMENT">Procurement Payment（采购款）</option>
+        <option value="PURCHASE">Purchase（购买款）</option>
+        <option value="PROPERTY PURCHASE">Property Purchase（购房款）</option>
+        <option value="INVESTMENT">Investment（投资款）</option>
+        <option value="REPAYMENT">Repayment（还款）</option>
+        <option value="LOAN">Loan（借款/放款）</option>
+        <option value="LENT">Lent（借出/垫付）</option>
+        <option value="LOGISTICS COSTS">Logistics Costs（物流费用）</option>
+        <option value="OTHER">Other（其他）</option>
+    </select>
+  </div>
+
+
+  <div class="form-group" id="transferReasonOtherBox" style="display:none;">
+    <label for="transferReasonOther">Please specify（请填写具体用途）<span class="required">*</span></label>
+    <input type="text" id="transferReasonOther" minlength="2" maxlength="120" />
+  </div>
+
+  <script>
+      (function () {
+        const sel = document.getElementById('transferReason');
+        const box = document.getElementById('transferReasonOtherBox');
+        const input = document.getElementById('transferReasonOther');
+
+        function toggleOther() {
+          const isOther = sel.value === 'OTHER';
+          box.style.display = isOther ? 'block' : 'none';
+          input.required = isOther;          // 为合规：仅在选择“Other”时要求必填
+          if (!isOther) input.value = '';    // 避免误传不必要的个人数据
+        }
+
+        sel.addEventListener('change', toggleOther);
+        // 若服务器端或本地恢复值，也能正确回显：
+        document.addEventListener('DOMContentLoaded', toggleOther);
+      })();
+  </script>
+
+    <button type="button" id="generatePdf">生成PDF发票</button>
+</form>
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const { PDFDocument, rgb, StandardFonts } = PDFLib;
+
+  // 坐标（不含 fees）
+  const POSITIONS = {
+    customer: {
+      date:        { x: 450, y: 55 },
+      refNo:       { x: 450, y: 75 },
+      receiving:   { x: 286, y: 134 },
+      rate:        { x: 287, y: 160 },
+      payAmount:   { x: 286, y: 176 },
+      bank:        { x: 120, y: 210 },
+      accountName: { x: 120, y: 225 },
+      bsb:         { x: 120, y: 241 },
+      accountNo:   { x: 230, y: 241 },
+      receiver:    { x: 120, y: 283 },
+      address:     { x: 120, y: 297 },
+      phone:       { x: 120, y: 311 },
+      reason:      { x: 345, y: 311 }
+    },
+    office: {
+      date:        { x: 450, y: 443 },
+      refNo:       { x: 450, y: 463 },
+      receiving:   { x: 286, y: 530 },
+      rate:        { x: 287, y: 556 },
+      payAmount:   { x: 286, y: 572 },
+      bank:        { x: 120, y: 606 },
+      accountName: { x: 120, y: 621 },
+      bsb:         { x: 120, y: 636 },
+      accountNo:   { x: 230, y: 636 },
+      receiver:    { x: 120, y: 680 },
+      address:     { x: 120, y: 695 },
+      phone:       { x: 120, y: 709 },
+      reason:      { x: 345, y: 709 }
+    }
+  };
+
+  const SYMBOLS = { AUD: '$', USD: '$', CNY: '\u00A5' };
+
+  function formatNumber(num) {
+    return Number(num).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
+  function updateUI() {
+    const type = document.getElementById("transactionType").value;
+    const labelEl = document.getElementById("amountInputLabel");
+    let label = "";
+    if (type === "AUD_to_CNY") label = "客户支付 (Receiving) $... AUD";
+    else if (type === "CNY_to_AUD") label = "客户支付 (Receiving) ¥... CNY";
+    else if (type === "USD_to_CNY") label = "客户支付 (Receiving) $... USD";
+    else if (type === "CNY_to_USD") label = "客户支付 (Receiving) ¥... CNY";
+    labelEl.textContent = label || "客户支付金额 *";
+    calculate();
+  }
+
+  function calculate() {
+    const type = document.getElementById("transactionType").value;
+    const rate = parseFloat(document.getElementById("rate").value);
+    const payVal = parseFloat(document.getElementById("payAmount").value);
+
+    if (!type || isNaN(rate) || rate <= 0 || isNaN(payVal) || payVal <= 0) {
+      document.getElementById("formula").textContent = "请输入完整信息";
+      return;
+    }
+
+    let receivingCur, payCur, receivingVal, payValFinal, baseCurForRate;
+
+    if (["AUD_to_CNY", "USD_to_CNY"].includes(type)) {
+      receivingCur = type.startsWith("AUD") ? "AUD" : "USD";
+      payCur = "CNY";
+      receivingVal = payVal;
+      payValFinal = payVal * rate;
+      baseCurForRate = receivingCur; // “1 外币 = ? CNY”
+    } else {
+      receivingCur = "CNY";
+      payCur = type.endsWith("AUD") ? "AUD" : "USD";
+      receivingVal = payVal;
+      payValFinal = payVal / rate;
+      baseCurForRate = payCur; // “1 外币 = ? CNY”
+    }
+
+    const recvText = `${SYMBOLS[receivingCur]}${formatNumber(receivingVal)} ${receivingCur}`;
+    const payText  = `${SYMBOLS[payCur]}${formatNumber(payValFinal)} ${payCur}`;
+
+    document.getElementById("formula").innerHTML =
+      `<strong>Receiving:</strong> ${recvText} → <strong>Pay Amount:</strong> ${payText}<br>` +
+      `<small>Rate: 1 ${baseCurForRate} = ${rate.toFixed(4)} CNY</small>`;
+
+    window.invoiceData = { recvText, payText, receivingCur, payCur, rate, baseCurForRate };
+  }
+
+  document.getElementById("transactionType").addEventListener("change", updateUI);
+  document.getElementById("rate").addEventListener("input", calculate);
+  document.getElementById("payAmount").addEventListener("input", calculate);
+
+  document.getElementById("generatePdf").addEventListener("click", async () => {
+    const date = document.getElementById("date").value;
+    const refNo = document.getElementById("refNo").value.trim();
+    const bankName = document.getElementById("bankName").value.trim().toUpperCase();
+    const accountName = document.getElementById("accountName").value.trim();
+    const bsb = document.getElementById("bsb").value.trim();
+    const accountNo = document.getElementById("accountNumber").value.trim();
+    const receiverName = document.getElementById("receiverName").value.trim();
+    const receiverAddress = document.getElementById("receiverAddress").value.trim();
+    const receiverPhone = document.getElementById("receiverPhone").value.trim();
+    const transferReason = document.getElementById("transferReason").value;
+
+    if (!date || !refNo || !window.invoiceData || !receiverName || !receiverAddress || !transferReason) {
+      alert("请填写所有必填项！");
+      return;
+    }
+
+    try {
+      const templateUrl = './template_receipt.pdf?' + new Date().getTime();
+      let templateBytes = null;
+      try {
+        const response = await fetch(templateUrl);
+        if (!response.ok) throw new Error(`加载失败: ${response.status}`);
+        templateBytes = await response.arrayBuffer();
+      } catch (e) {
+        const tmpDoc = await PDFLib.PDFDocument.create();
+        const page = tmpDoc.addPage([595.28, 841.89]);
+        const { width } = page.getSize();
+        const font = await tmpDoc.embedFont(StandardFonts.Helvetica);
+        page.drawText('TEMP TEMPLATE (A4)', { x: (width/2)-120, y: 810, size: 10, font, color: rgb(0.6,0.6,0.6) });
+        templateBytes = await tmpDoc.save();
+      }
+
+      const pdfDoc = await PDFLib.PDFDocument.load(templateBytes);
+      const page = pdfDoc.getPages()[0];
+      const height = page.getHeight();
+
+      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+      function drawText(posKey, layer, text, isBold = false, size = 9, align = 'left') {
+        const pos = POSITIONS[layer][posKey];
+        if (!pos || !text) return;
+        const finalY = height - pos.y;
+        const fontSize = size;
+        const fontUsed = isBold ? boldFont : font;
+        let finalX = pos.x;
+        if (align === 'right') {
+          const textWidth = fontUsed.widthOfTextAtSize(text, fontSize);
+          finalX = pos.x - textWidth;
+        }
+        page.drawText(text, { x: finalX, y: finalY, size: fontSize, font: fontUsed, color: rgb(0, 0, 0) });
+      }
+
+      const data = window.invoiceData;
+      const formattedDate = formatDate(date);
+
+      // Customer Copy (no fees)
+      drawText('date', 'customer', formattedDate, true, 9);
+      drawText('refNo', 'customer', refNo, false, 9);
+      drawText('receiving', 'customer', data.recvText, false, 9, 'right');
+      drawText('rate', 'customer', data.rate.toFixed(4), true, 9, 'right');
+      drawText('payAmount', 'customer', data.payText, true, 9, 'right');
+
+      if (bankName) drawText('bank', 'customer', `${bankName}`, false, 8);
+      if (accountName) drawText('accountName', 'customer', `${accountName}`, false, 8);
+      if (bsb) drawText('bsb', 'customer', `${bsb}`, false, 8);
+      if (accountNo) drawText('accountNo', 'customer', `${accountNo}`, false, 8);
+
+      drawText('receiver', 'customer', `${receiverName}`, false, 9);
+      drawText('address', 'customer', `${receiverAddress}`, false, 9);
+      drawText('phone', 'customer', `${receiverPhone}`, false, 9);
+      drawText('reason', 'customer', `${transferReason}`, false, 9);
+
+      // Office Copy (no fees)
+      drawText('date', 'office', formattedDate, true, 9);
+      drawText('refNo', 'office', refNo, false, 9);
+      drawText('receiving', 'office', data.recvText, false, 9, 'right');
+      drawText('rate', 'office', data.rate.toFixed(4), true, 9, 'right');
+      drawText('payAmount', 'office', data.payText, true, 9, 'right');
+
+      if (bankName) drawText('bank', 'office', `${bankName}`, false, 8);
+      if (accountName) drawText('accountName', 'office', `${accountName}`, false, 8);
+      if (bsb) drawText('bsb', 'office', `${bsb}`, false, 8);
+      if (accountNo) drawText('accountNo', 'office', `${accountNo}`, false, 8);
+
+      drawText('receiver', 'office', `${receiverName}`, false, 9);
+      drawText('address', 'office', `${receiverAddress}`, false, 9);
+      drawText('phone', 'office', `${receiverPhone}`, false, 9);
+      drawText('reason', 'office', `${transferReason}`, false, 9);
+
+      const pdfBytes = await pdfDoc.save();
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${refNo}_Transfer_Transaction_Receipt.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("PDF生成失败:", error);
+      alert("错误：" + error.message);
+    }
+  });
+
+  function formatDate(dateStr) {
+    const d = new Date(dateStr);
+    const dd = String(d.getDate()).padStart(2,'0');
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const yyyy = d.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+  }
+
+  updateUI();
+});
+</script>
+
+</body>
+</html>

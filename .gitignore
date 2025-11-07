@@ -1,0 +1,10 @@
+﻿# Python / IDE noise
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+.vscode/
+.idea/
+.DS_Store
