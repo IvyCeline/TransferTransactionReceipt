@@ -224,10 +224,10 @@ window.addEventListener('DOMContentLoaded', () => {
       receiving:   { x: 286, y: 131.5 },
       rate:        { x: 287, y: 160 },
       payAmount:   { x: 286, y: 174 },
-      bank:        { x: 120, y: 210 },
-      accountName: { x: 120, y: 226 },
-      bsb:         { x: 120, y: 243 },
-      accountNo:   { x: 230, y: 243 },
+      bank:        { x: 115, y: 210 },
+      accountName: { x: 115, y: 226 },
+      bsb:         { x: 115, y: 242 },
+      accountNo:   { x: 230, y: 242 },
       receiver:    { x: 115, y: 283 },
       address:     { x: 115, y: 297 },
       phone:       { x: 115, y: 311 },
@@ -239,10 +239,10 @@ window.addEventListener('DOMContentLoaded', () => {
       receiving:   { x: 286, y: 528 },
       rate:        { x: 287, y: 556 },
       payAmount:   { x: 286, y: 570 },
-      bank:        { x: 120, y: 606 },
-      accountName: { x: 120, y: 624 },
-      bsb:         { x: 120, y: 640 },
-      accountNo:   { x: 230, y: 640 },
+      bank:        { x: 115, y: 606 },
+      accountName: { x: 115, y: 623 },
+      bsb:         { x: 115, y: 639 },
+      accountNo:   { x: 230, y: 639 },
       receiver:    { x: 115, y: 680 },
       address:     { x: 115, y: 695 },
       phone:       { x: 115, y: 709 },
@@ -250,7 +250,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  const SYMBOLS = { AUD: '$', USD: '$', CNY: '\u00A5' };
+  const SYMBOLS = { AUD: '$', USD: '$', CNY: '\u00A5 ' };
 
   function formatNumber(num) {
     return Number(num).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -294,8 +294,8 @@ window.addEventListener('DOMContentLoaded', () => {
       baseCurForRate = payCur; // “1 外币 = ? CNY”
     }
 
-    const recvText = `${SYMBOLS [receivingCur]}${formatNumber(receivingVal)} ${receivingCur}`;
-    const payText  = `${SYMBOLS [payCur]}${formatNumber(payValFinal)} ${payCur}`;
+    const recvText = `${SYMBOLS[receivingCur]}${formatNumber(receivingVal)} $ {receivingCur}`;
+    const payText  = `${SYMBOLS[payCur]}${formatNumber(payValFinal)} $ {payCur}`;
 
     document.getElementById("formula").innerHTML =
       `<strong>Receiving:</strong> ${recvText} → <strong>Pay Amount:</strong> ${payText}<br>` +
@@ -369,7 +369,7 @@ window.addEventListener('DOMContentLoaded', () => {
       drawText('date', 'customer', formattedDate, true, 9);
       drawText('refNo', 'customer', refNo, true, 9);
       drawText('receiving', 'customer', data.recvText, true, 9, 'right');
-      drawText('rate', 'customer', data.rate.toFixed(4), true, 9, 'right');
+      drawText('rate', 'customer', data.rate.toFixed(4), false, 9, 'right');
       drawText('payAmount', 'customer', data.payText, true, 9, 'right');
 
       if (bankName) drawText('bank', 'customer', `${bankName}`, false, 8);
@@ -384,9 +384,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
       // Office Copy (no fees)
       drawText('date', 'office', formattedDate, true, 9);
-      drawText('refNo', 'office', refNo, false, 9);
-      drawText('receiving', 'office', data.recvText, false, 9, 'right');
-      drawText('rate', 'office', data.rate.toFixed(4), true, 9, 'right');
+      drawText('refNo', 'office', refNo, true, 9);
+      drawText('receiving', 'office', data.recvText, true, 9, 'right');
+      drawText('rate', 'office', data.rate.toFixed(4), false, 9, 'right');
       drawText('payAmount', 'office', data.payText, true, 9, 'right');
 
       if (bankName) drawText('bank', 'office', `${bankName}`, false, 8);
