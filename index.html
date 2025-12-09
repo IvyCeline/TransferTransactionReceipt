@@ -224,13 +224,13 @@ window.addEventListener('DOMContentLoaded', () => {
       receiving:   { x: 286, y: 131.5 },
       rate:        { x: 287, y: 160 },
       payAmount:   { x: 286, y: 174 },
-      bank:        { x: 115, y: 210 },
-      accountName: { x: 115, y: 226 },
-      bsb:         { x: 115, y: 242 },
-      accountNo:   { x: 230, y: 242 },
-      receiver:    { x: 115, y: 283 },
-      address:     { x: 115, y: 297 },
-      phone:       { x: 115, y: 311 },
+      bank:        { x: 110, y: 210 },
+      accountName: { x: 110, y: 226 },
+      bsb:         { x: 110, y: 242 },
+      accountNo:   { x: 228, y: 242 },
+      receiver:    { x: 110, y: 283 },
+      address:     { x: 110, y: 297 },
+      phone:       { x: 110, y: 311 },
       reason:      { x: 345, y: 311 }
     },
     office: {
@@ -239,18 +239,18 @@ window.addEventListener('DOMContentLoaded', () => {
       receiving:   { x: 286, y: 528 },
       rate:        { x: 287, y: 556 },
       payAmount:   { x: 286, y: 570 },
-      bank:        { x: 115, y: 606 },
-      accountName: { x: 115, y: 623 },
-      bsb:         { x: 115, y: 639 },
-      accountNo:   { x: 230, y: 639 },
-      receiver:    { x: 115, y: 680 },
-      address:     { x: 115, y: 695 },
-      phone:       { x: 115, y: 709 },
+      bank:        { x: 110, y: 606 },
+      accountName: { x: 110, y: 623 },
+      bsb:         { x: 110, y: 639 },
+      accountNo:   { x: 228, y: 639 },
+      receiver:    { x: 110, y: 680 },
+      address:     { x: 110, y: 695 },
+      phone:       { x: 110, y: 709 },
       reason:      { x: 345, y: 709 }
     }
   };
 
-  const SYMBOLS = { AUD: '$', USD: '$', CNY: '\u00A5 ' };
+  const SYMBOLS = { AUD: '$ ', USD: '$ ', CNY: '\u00A5 ' };
 
   function formatNumber(num) {
     return Number(num).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -294,8 +294,8 @@ window.addEventListener('DOMContentLoaded', () => {
       baseCurForRate = payCur; // “1 外币 = ? CNY”
     }
 
-    const recvText = `${SYMBOLS[receivingCur]}${formatNumber(receivingVal)} $ {receivingCur}`;
-    const payText  = `${SYMBOLS[payCur]}${formatNumber(payValFinal)} $ {payCur}`;
+    const recvText = `${SYMBOLS[receivingCur]}${formatNumber(receivingVal)} ${receivingCur}`;
+    const payText  = `${SYMBOLS[payCur]}${formatNumber(payValFinal)} ${payCur}`;
 
     document.getElementById("formula").innerHTML =
       `<strong>Receiving:</strong> ${recvText} → <strong>Pay Amount:</strong> ${payText}<br>` +
