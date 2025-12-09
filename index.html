@@ -225,12 +225,12 @@ window.addEventListener('DOMContentLoaded', () => {
       rate:        { x: 287, y: 160 },
       payAmount:   { x: 286, y: 174 },
       bank:        { x: 120, y: 210 },
-      accountName: { x: 120, y: 225 },
-      bsb:         { x: 120, y: 241 },
-      accountNo:   { x: 230, y: 241 },
-      receiver:    { x: 120, y: 283 },
-      address:     { x: 120, y: 297 },
-      phone:       { x: 120, y: 311 },
+      accountName: { x: 120, y: 226 },
+      bsb:         { x: 120, y: 243 },
+      accountNo:   { x: 230, y: 243 },
+      receiver:    { x: 115, y: 283 },
+      address:     { x: 115, y: 297 },
+      phone:       { x: 115, y: 311 },
       reason:      { x: 345, y: 311 }
     },
     office: {
@@ -240,12 +240,12 @@ window.addEventListener('DOMContentLoaded', () => {
       rate:        { x: 287, y: 556 },
       payAmount:   { x: 286, y: 570 },
       bank:        { x: 120, y: 606 },
-      accountName: { x: 120, y: 621 },
-      bsb:         { x: 120, y: 636 },
-      accountNo:   { x: 230, y: 636 },
-      receiver:    { x: 120, y: 680 },
-      address:     { x: 120, y: 695 },
-      phone:       { x: 120, y: 709 },
+      accountName: { x: 120, y: 624 },
+      bsb:         { x: 120, y: 640 },
+      accountNo:   { x: 230, y: 640 },
+      receiver:    { x: 115, y: 680 },
+      address:     { x: 115, y: 695 },
+      phone:       { x: 115, y: 709 },
       reason:      { x: 345, y: 709 }
     }
   };
@@ -294,8 +294,8 @@ window.addEventListener('DOMContentLoaded', () => {
       baseCurForRate = payCur; // “1 外币 = ? CNY”
     }
 
-    const recvText = `${SYMBOLS[receivingCur]}${formatNumber(receivingVal)} ${receivingCur}`;
-    const payText  = `${SYMBOLS[payCur]}${formatNumber(payValFinal)} ${payCur}`;
+    const recvText = `${SYMBOLS [receivingCur]}${formatNumber(receivingVal)} ${receivingCur}`;
+    const payText  = `${SYMBOLS [payCur]}${formatNumber(payValFinal)} ${payCur}`;
 
     document.getElementById("formula").innerHTML =
       `<strong>Receiving:</strong> ${recvText} → <strong>Pay Amount:</strong> ${payText}<br>` +
@@ -367,8 +367,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
       // Customer Copy (no fees)
       drawText('date', 'customer', formattedDate, true, 9);
-      drawText('refNo', 'customer', refNo, false, 9);
-      drawText('receiving', 'customer', data.recvText, false, 9, 'right');
+      drawText('refNo', 'customer', refNo, true, 9);
+      drawText('receiving', 'customer', data.recvText, true, 9, 'right');
       drawText('rate', 'customer', data.rate.toFixed(4), true, 9, 'right');
       drawText('payAmount', 'customer', data.payText, true, 9, 'right');
 
