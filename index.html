@@ -385,7 +385,7 @@ window.addEventListener('DOMContentLoaded', () => {
       drawText('receiver', 'customer', `${receiverName}`, false, 9);
       drawText('address', 'customer', `${receiverAddress}`, false, 9);
       drawText('phone', 'customer', `${receiverPhone}`, false, 9);
-      const reasonText = transferReason === 'OTHER' ? transferReasonOther : transferReason;
+      const reasonText = transferReason === 'OTHER' ? transferReasonOther.toUpperCase() : transferReason;
       drawText('reason', 'customer', `${reasonText}`, false, 9);
 
       // Office Copy (no fees)
