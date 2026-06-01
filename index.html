@@ -295,21 +295,21 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  const CURRENCY_PREFIXES = { AUD: '$ AUD ', USD: '$ USD ', CNY: '\uFFE5 RMB ' };
+  const CURRENCY_SYMBOLS = { AUD: '$ ', USD: '$ ', CNY: '\u00A5 ' };
   const TRANSACTION_RULES = {
-    AUD_to_CNY: { receivingCur: "AUD", payCur: "CNY", operation: "multiply", rateBase: "AUD", rateQuote: "CNY", amountLabel: "客户支付 (Receiving) $ AUD..." },
-    CNY_to_AUD: { receivingCur: "CNY", payCur: "AUD", operation: "divide", rateBase: "AUD", rateQuote: "CNY", amountLabel: "客户支付 (Receiving) ￥ RMB..." },
-    USD_to_CNY: { receivingCur: "USD", payCur: "CNY", operation: "multiply", rateBase: "USD", rateQuote: "CNY", amountLabel: "客户支付 (Receiving) $ USD..." },
-    CNY_to_USD: { receivingCur: "CNY", payCur: "USD", operation: "divide", rateBase: "USD", rateQuote: "CNY", amountLabel: "客户支付 (Receiving) ￥ RMB..." },
-    AUD_to_USD: { receivingCur: "AUD", payCur: "USD", operation: "multiply", rateBase: "AUD", rateQuote: "USD", amountLabel: "客户支付 (Receiving) $ AUD..." },
-    USD_to_AUD: { receivingCur: "USD", payCur: "AUD", operation: "divide", rateBase: "AUD", rateQuote: "USD", amountLabel: "客户支付 (Receiving) $ USD..." }
+    AUD_to_CNY: { receivingCur: "AUD", payCur: "CNY", operation: "multiply", rateBase: "AUD", rateQuote: "CNY", amountLabel: "客户支付 (Receiving) $... AUD" },
+    CNY_to_AUD: { receivingCur: "CNY", payCur: "AUD", operation: "divide", rateBase: "AUD", rateQuote: "CNY", amountLabel: "客户支付 (Receiving) ¥... CNY" },
+    USD_to_CNY: { receivingCur: "USD", payCur: "CNY", operation: "multiply", rateBase: "USD", rateQuote: "CNY", amountLabel: "客户支付 (Receiving) $... USD" },
+    CNY_to_USD: { receivingCur: "CNY", payCur: "USD", operation: "divide", rateBase: "USD", rateQuote: "CNY", amountLabel: "客户支付 (Receiving) ¥... CNY" },
+    AUD_to_USD: { receivingCur: "AUD", payCur: "USD", operation: "multiply", rateBase: "AUD", rateQuote: "USD", amountLabel: "客户支付 (Receiving) $... AUD" },
+    USD_to_AUD: { receivingCur: "USD", payCur: "AUD", operation: "divide", rateBase: "AUD", rateQuote: "USD", amountLabel: "客户支付 (Receiving) $... USD" }
   };
 
   function formatNumber(num) {
     return Number(num).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
   function formatCurrency(currency, amount) {
-    return `${CURRENCY_PREFIXES[currency] || ''}${formatNumber(amount)}`;
+    return `${CURRENCY_SYMBOLS[currency] || ''}${formatNumber(amount)} ${currency}`;
   }
   // Format CNY account numbers: if there are already spaces, return as-is;
   // otherwise insert a space every 4 characters (e.g. 201000393657072 -> 2010 0039 3657 072)
