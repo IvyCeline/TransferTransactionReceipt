@@ -32,7 +32,7 @@
 <body>
 
 <h1>海侨汇通 - 货币兑换发票</h1>
-<p class="subtitle">支持 AUD/USD ↔ CNY 兑换，双联自动填充</p>
+<p class="subtitle">支持 AUD/USD/CNY 兑换，双联自动填充</p>
 
 <form id="webForm">
   <div class="grid-2">
@@ -56,11 +56,13 @@
       <option value="CNY_to_AUD">CNY → AUD（客户付CNY收AUD）</option>
       <option value="USD_to_CNY">USD → CNY（客户付USD收CNY）</option>
       <option value="CNY_to_USD">CNY → USD（客户付CNY收USD）</option>
+      <option value="AUD_to_USD">AUD → USD（客户付AUD收USD）</option>
+      <option value="USD_to_AUD">USD → AUD（客户付USD收AUD）</option>
     </select>
   </div>
 
   <div class="form-group">
-    <label>汇率 Rate (1 外币 = ? CNY) *</label>
+    <label id="rateLabel">汇率 Rate (1 外币 = ? CNY) *</label>
     <input type="number" id="rate" step="0.0001" required autocomplete="off" />
   </div>
 
@@ -293,10 +295,21 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  const SYMBOLS = { AUD: '$ ', USD: '$ ', CNY: '\u00A5 ' };
+  const CURRENCY_PREFIXES = { AUD: '$ AUD ', USD: '$ USD ', CNY: '\uFFE5 RMB ' };
+  const TRANSACTION_RULES = {
+    AUD_to_CNY: { receivingCur: "AUD", payCur: "CNY", operation: "multiply", rateBase: "AUD", rateQuote: "CNY", amountLabel: "客户支付 (Receiving) $ AUD..." },
+    CNY_to_AUD: { receivingCur: "CNY", payCur: "AUD", operation: "divide", rateBase: "AUD", rateQuote: "CNY", amountLabel: "客户支付 (Receiving) ￥ RMB..." },
+    USD_to_CNY: { receivingCur: "USD", payCur: "CNY", operation: "multiply", rateBase: "USD", rateQuote: "CNY", amountLabel: "客户支付 (Receiving) $ USD..." },
+    CNY_to_USD: { receivingCur: "CNY", payCur: "USD", operation: "divide", rateBase: "USD", rateQuote: "CNY", amountLabel: "客户支付 (Receiving) ￥ RMB..." },
+    AUD_to_USD: { receivingCur: "AUD", payCur: "USD", operation: "multiply", rateBase: "AUD", rateQuote: "USD", amountLabel: "客户支付 (Receiving) $ AUD..." },
+    USD_to_AUD: { receivingCur: "USD", payCur: "AUD", operation: "divide", rateBase: "AUD", rateQuote: "USD", amountLabel: "客户支付 (Receiving) $ USD..." }
+  };
 
   function formatNumber(num) {
     return Number(num).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+  function formatCurrency(currency, amount) {
+    return `${CURRENCY_PREFIXES[currency] || ''}${formatNumber(amount)}`;
   }
   // Format CNY account numbers: if there are already spaces, return as-is;
   // otherwise insert a space every 4 characters (e.g. 201000393657072 -> 2010 0039 3657 072)
@@ -311,13 +324,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
   function updateUI() {
     const type = document.getElementById("transactionType").value;
+    const rule = TRANSACTION_RULES[type];
     const labelEl = document.getElementById("amountInputLabel");
-    let label = "";
-    if (type === "AUD_to_CNY") label = "客户支付 (Receiving) $... AUD";
-    else if (type === "CNY_to_AUD") label = "客户支付 (Receiving) ¥... CNY";
-    else if (type === "USD_to_CNY") label = "客户支付 (Receiving) $... USD";
-    else if (type === "CNY_to_USD") label = "客户支付 (Receiving) ¥... CNY";
-    labelEl.textContent = label || "客户支付金额 *";
+    const rateLabelEl = document.getElementById("rateLabel");
+    labelEl.textContent = rule ? rule.amountLabel : "客户支付金额 *";
+    rateLabelEl.textContent = rule ? `汇率 Rate (1 ${rule.rateBase} = ? ${rule.rateQuote}) *` : "汇率 Rate (1 外币 = ? CNY) *";
     calculate();
   }
 
@@ -331,30 +342,25 @@ window.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    let receivingCur, payCur, receivingVal, payValFinal, baseCurForRate;
-
-    if (["AUD_to_CNY", "USD_to_CNY"].includes(type)) {
-      receivingCur = type.startsWith("AUD") ? "AUD" : "USD";
-      payCur = "CNY";
-      receivingVal = payVal;
-      payValFinal = payVal * rate;
-      baseCurForRate = receivingCur; // “1 外币 = ? CNY”
-    } else {
-      receivingCur = "CNY";
-      payCur = type.endsWith("AUD") ? "AUD" : "USD";
-      receivingVal = payVal;
-      payValFinal = payVal / rate;
-      baseCurForRate = payCur; // “1 外币 = ? CNY”
+    const rule = TRANSACTION_RULES[type];
+    if (!rule) {
+      document.getElementById("formula").textContent = "请选择交易类型";
+      return;
     }
 
-    const recvText = `${SYMBOLS[receivingCur]}${formatNumber(receivingVal)} ${receivingCur}`;
-    const payText  = `${SYMBOLS[payCur]}${formatNumber(payValFinal)} ${payCur}`;
+    const receivingCur = rule.receivingCur;
+    const payCur = rule.payCur;
+    const receivingVal = payVal;
+    const payValFinal = rule.operation === "multiply" ? payVal * rate : payVal / rate;
+
+    const recvText = formatCurrency(receivingCur, receivingVal);
+    const payText  = formatCurrency(payCur, payValFinal);
 
     document.getElementById("formula").innerHTML =
       `<strong>Receiving:</strong> ${recvText} → <strong>Pay Amount:</strong> ${payText}<br>` +
-      `<small>Rate: 1 ${baseCurForRate} = ${rate.toFixed(4)} CNY</small>`;
+      `<small>Rate: 1 ${rule.rateBase} = ${rate.toFixed(4)} ${rule.rateQuote}</small>`;
 
-    window.invoiceData = { recvText, payText, receivingCur, payCur, rate, baseCurForRate };
+    window.invoiceData = { recvText, payText, receivingCur, payCur, rate, rateBase: rule.rateBase, rateQuote: rule.rateQuote };
   }
 
   document.getElementById("transactionType").addEventListener("change", updateUI);
