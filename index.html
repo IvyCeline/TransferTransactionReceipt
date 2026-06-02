@@ -16,6 +16,8 @@
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
     button { background-color: #1a5dbb; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; display: block; margin: 30px auto; }
     .calculation { text-align: center; font-size: 16px; margin: 20px 0; padding: 10px; background-color: #eef4ff; border-radius: 4px; }
+    .checkbox-row label { display: flex; align-items: center; gap: 8px; font-weight: normal; }
+    .checkbox-row input[type="checkbox"] { width: auto; margin: 0; }
     .required { color: red; }
     /* Locked appearance for bank fields when CASH selected */
     #bankFields.locked input {
@@ -69,6 +71,13 @@
   <div class="form-group">
     <label id="amountInputLabel">客户支付金额 *</label>
     <input type="number" id="payAmount" step="0.01" placeholder="输入金额" required />
+  </div>
+
+  <div class="form-group checkbox-row">
+    <label>
+      <input type="checkbox" id="roundUpPayAmount" />
+      Pay Amount 向上取整为整数
+    </label>
   </div>
 
   <div class="calculation">
@@ -308,6 +317,9 @@ window.addEventListener('DOMContentLoaded', () => {
   function formatNumber(num) {
     return Number(num).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
+  function roundToCents(num) {
+    return Math.round((Number(num) + Number.EPSILON) * 100) / 100;
+  }
   function formatCurrency(currency, amount) {
     return `${CURRENCY_SYMBOLS[currency] || ''}${formatNumber(amount)} ${currency}`;
   }
@@ -336,6 +348,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const type = document.getElementById("transactionType").value;
     const rate = parseFloat(document.getElementById("rate").value);
     const payVal = parseFloat(document.getElementById("payAmount").value);
+    const roundUpPayAmount = document.getElementById("roundUpPayAmount").checked;
 
     if (!type || isNaN(rate) || rate <= 0 || isNaN(payVal) || payVal <= 0) {
       document.getElementById("formula").textContent = "请输入完整信息";
@@ -351,21 +364,38 @@ window.addEventListener('DOMContentLoaded', () => {
     const receivingCur = rule.receivingCur;
     const payCur = rule.payCur;
     const receivingVal = payVal;
-    const payValFinal = rule.operation === "multiply" ? payVal * rate : payVal / rate;
+    const rawPayValFinal = rule.operation === "multiply" ? payVal * rate : payVal / rate;
+    const exactPayValFinal = roundToCents(rawPayValFinal);
+    const payValFinal = roundUpPayAmount ? Math.ceil(exactPayValFinal) : exactPayValFinal;
 
     const recvText = formatCurrency(receivingCur, receivingVal);
     const payText  = formatCurrency(payCur, payValFinal);
+    const roundUpNote = roundUpPayAmount && payValFinal !== exactPayValFinal
+      ? `<br><small>Round up from ${formatCurrency(payCur, exactPayValFinal)}</small>`
+      : "";
 
     document.getElementById("formula").innerHTML =
       `<strong>Receiving:</strong> ${recvText} → <strong>Pay Amount:</strong> ${payText}<br>` +
-      `<small>Rate: 1 ${rule.rateBase} = ${rate.toFixed(4)} ${rule.rateQuote}</small>`;
+      `<small>Rate: 1 ${rule.rateBase} = ${rate.toFixed(4)} ${rule.rateQuote}</small>` +
+      roundUpNote;
 
-    window.invoiceData = { recvText, payText, receivingCur, payCur, rate, rateBase: rule.rateBase, rateQuote: rule.rateQuote };
+    window.invoiceData = {
+      recvText,
+      payText,
+      receivingCur,
+      payCur,
+      rate,
+      rateBase: rule.rateBase,
+      rateQuote: rule.rateQuote,
+      roundUpPayAmount,
+      exactPayText: formatCurrency(payCur, exactPayValFinal)
+    };
   }
 
   document.getElementById("transactionType").addEventListener("change", updateUI);
   document.getElementById("rate").addEventListener("input", calculate);
   document.getElementById("payAmount").addEventListener("input", calculate);
+  document.getElementById("roundUpPayAmount").addEventListener("change", calculate);
 
   document.getElementById("generatePdf").addEventListener("click", async () => {
     const date = document.getElementById("date").value;
